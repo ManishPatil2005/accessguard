@@ -102,11 +102,11 @@ nav a:hover {
 
 .glass-card {
     border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    background: linear-gradient(170deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06));
-    backdrop-filter: blur(14px);
-    box-shadow: 0 24px 46px -30px var(--shadow);
-    padding: 26px;
+    border-radius: 24px;
+    background: linear-gradient(170deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06));
+    backdrop-filter: blur(16px);
+    box-shadow: 0 24px 48px -28px var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    padding: 32px;
     animation: rise 0.55s ease;
 }
 
@@ -165,32 +165,53 @@ h3 {
 .btn {
     border: 0;
     border-radius: 11px;
-    padding: 10px 14px;
+    padding: 11px 20px;
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    transition: transform 0.22s ease, filter 0.22s ease;
+    transition: transform 0.22s ease, filter 0.22s ease, box-shadow 0.22s ease;
+    font-size: 0.95rem;
 }
 
 .btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
     transform: translateY(-1px);
-    filter: brightness(1.06);
 }
 
 .btn-primary {
     background: linear-gradient(125deg, #2fb5ff, #43d89f);
     color: #04212a;
+    box-shadow: 0 4px 12px rgba(47, 181, 255, 0.25);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 8px 20px rgba(47, 181, 255, 0.35);
 }
 
 .btn-secondary {
     background: rgba(255, 255, 255, 0.19);
     color: var(--text-main);
     border: 1px solid rgba(255, 255, 255, 0.32);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.08);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .btn-warning {
     background: linear-gradient(125deg, #ffb347, #ffcf77);
     color: #312102;
+    box-shadow: 0 4px 12px rgba(255, 179, 71, 0.25);
+}
+
+.btn-warning:hover {
+    box-shadow: 0 8px 20px rgba(255, 179, 71, 0.35);
 }
 
 .form-card {
@@ -206,42 +227,58 @@ h3 {
 label {
     font-weight: 600;
     font-size: 0.95rem;
+    display: block;
+    margin-bottom: 6px;
 }
 
 input,
 select {
     width: 100%;
-    border-radius: 11px;
-    border: 1px solid rgba(255, 255, 255, 0.36);
-    background: rgba(5, 15, 22, 0.42);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    background: rgba(5, 15, 22, 0.54);
     color: var(--text-main);
-    padding: 10px 12px;
+    padding: 12px 14px;
     outline: none;
+    font-size: 0.95rem;
+    transition: border-color 0.24s ease, background 0.24s ease, box-shadow 0.24s ease;
+}
+
+input:hover,
+select:hover {
+    background: rgba(5, 15, 22, 0.62);
+    border-color: rgba(255, 255, 255, 0.42);
 }
 
 input:focus,
 select:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(106, 213, 255, 0.19);
+    background: rgba(5, 15, 22, 0.72);
+    box-shadow: 0 0 0 3px rgba(106, 213, 255, 0.25), inset 0 0 0 1px rgba(106, 213, 255, 0.12);
 }
 
 .alert {
-    margin-top: 14px;
-    border-radius: 11px;
-    padding: 10px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    margin-top: 16px;
+    border-radius: 13px;
+    padding: 13px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    animation: slideIn 0.35s ease;
+    font-weight: 500;
 }
 
 .alert.success {
-    background: rgba(53, 208, 132, 0.22);
+    background: rgba(53, 208, 132, 0.18);
+    border-color: rgba(53, 208, 132, 0.4);
 }
 
 .alert.error {
-    background: rgba(255, 107, 107, 0.2);
+    background: rgba(255, 107, 107, 0.18);
+    border-color: rgba(255, 107, 107, 0.4);
 }
 
 .alert.info {
-    background: rgba(106, 213, 255, 0.18);
+    background: rgba(106, 213, 255, 0.16);
+    border-color: rgba(106, 213, 255, 0.4);
 }
 
 .table-wrap {
@@ -351,6 +388,17 @@ th {
     }
     to {
         transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
         opacity: 1;
     }
 }
