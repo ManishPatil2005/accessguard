@@ -92,7 +92,18 @@ def log_login_attempt(email: str, success: bool, is_locked: bool) -> None:
 def get_user_by_email(email: str) -> Optional[sqlite3.Row]:
     conn = get_db_connection()
     user = conn.execute(
-        "SELECT email, password_hash, role, failed_attempts, is_locked FROM users WHERE email = ?",
+        "SELECT email, password_hash, role, failed_attempts, is_locked, created_at FROM users WHERE email = ?",
+        (email,),
+    ).fetchone()
+    conn.close()
+    return user
+
+
+def get_user_account_status(email: str) -> Optional[sqlite3.Row]:
+    """Retrieve full user account status for display."""
+    conn = get_db_connection()
+    user = conn.execute(
+        "SELECT email, role, failed_attempts, is_locked, created_at FROM users WHERE email = ?",
         (email,),
     ).fetchone()
     conn.close()
@@ -256,43 +267,80 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
 
 @app.get("/welcome")
 def welcome(request: Request):
+    """User-only welcome page. Admins are redirected to dashboard."""
     session_email, session_role = require_authenticated_user(request)
+    
+    # Explicit RBAC: Admins cannot access /welcome
     if session_role == "admin":
         return RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Only users can see this page
+    if session_role != "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User access only")
+    
+    # Get account status information
+    user_account = get_user_account_status(session_email)
+    if not user_account:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+    
     return templates.TemplateResponse(
         request,
         "welcome.html",
         {
             "email": session_email,
             "role": session_role,
+            "is_locked": user_account["is_locked"],
+            "failed_attempts": user_account["failed_attempts"],
+            "created_at": user_account["created_at"],
         },
     )
 
 
 @app.get("/dashboard")
 def dashboard(request: Request):
-    require_admin(request)
+    """Admin-only dashboard for security monitoring and account management."""
+    admin_email, admin_role = require_admin(request)
 
     conn = get_db_connection()
+    
+    # Get recent login attempts (audit log)
     attempts = conn.execute(
         """
         SELECT email, timestamp, success, is_locked
         FROM login_attempts
         ORDER BY id DESC
+        LIMIT 50
         """
     ).fetchall()
 
+    # Get locked accounts with full details
     locked_users = conn.execute(
-        "SELECT email, failed_attempts FROM users WHERE is_locked = 1 ORDER BY email"
+        "SELECT email, failed_attempts, created_at FROM users WHERE is_locked = 1 ORDER BY email"
     ).fetchall()
+    
+    # Get all users for dashboard statistics
+    all_users = conn.execute(
+        "SELECT email, role, is_locked, failed_attempts, created_at FROM users ORDER BY email"
+    ).fetchall()
+    
+    # Calculate security statistics
+    total_users = len(all_users)
+    locked_count = len(locked_users)
+    active_users = total_users - locked_count
+    
     conn.close()
 
     return templates.TemplateResponse(
         request,
         "dashboard.html",
         {
+            "admin_email": admin_email,
             "attempts": attempts,
             "locked_users": locked_users,
+            "all_users": all_users,
+            "total_users": total_users,
+            "active_users": active_users,
+            "locked_count": locked_count,
             "message": request.query_params.get("message", ""),
         },
     )

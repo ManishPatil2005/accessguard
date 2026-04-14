@@ -1,14 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Welcome{% endblock %}
+{% block title %}User Account - AccessGuard{% endblock %}
 
 {% block content %}
 <section class="glass-card hero-card">
-    <p class="eyebrow">Authenticated Session</p>
-    <h1>Welcome, {{ email }}</h1>
+    <p class="eyebrow">AUTHENTICATED SESSION</p>
+    <h1>Account: {{ email }}</h1>
     <p class="lead">
-        You are logged in as a <strong>{{ role }}</strong> account. Your access is restricted
-        according to role-based access control to minimize privilege abuse.
+        Your access is restricted according to role-based access control. Account status and security settings are displayed below.
     </p>
+</section>
+
+<section class="glass-card">
+    <h2>Account Status</h2>
+    <div class="status-grid">
+        <div class="status-item">
+            <label>Email Address</label>
+            <p class="status-value">{{ email }}</p>
+        </div>
+        <div class="status-item">
+            <label>Account Role</label>
+            <p class="status-value">{{ role | upper }}</p>
+        </div>
+        <div class="status-item">
+            <label>Account Status</label>
+            {% if is_locked == 1 %}
+                <p class="status-value status-locked">🔒 LOCKED</p>
+            {% else %}
+                <p class="status-value status-active">✓ ACTIVE</p>
+            {% endif %}
+        </div>
+        <div class="status-item">
+            <label>Failed Login Attempts</label>
+            <p class="status-value">{{ failed_attempts }} / 3</p>
+        </div>
+        <div class="status-item">
+            <label>Account Created</label>
+            <p class="status-value">{{ created_at }}</p>
+        </div>
+    </div>
+</section>
+
+<section class="glass-card">
+    <h2>Security Information</h2>
+    <ul class="security-list">
+        <li>Your account is protected by SHA-256 hashed passwords.</li>
+        <li>Account locks after 3 failed login attempts to prevent brute-force attacks.</li>
+        <li>All login attempts are logged and monitored by administrators.</li>
+        <li>Session timeout: 1 hour of inactivity.</li>
+        <li>Only administrators can unlock accounts.</li>
+    </ul>
+</section>
+
+<section class="glass-card">
     <div class="actions">
         <a class="btn btn-secondary" href="/logout">Logout</a>
     </div>
