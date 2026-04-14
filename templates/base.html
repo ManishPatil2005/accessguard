@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AccessGuard - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="aurora aurora-one"></div>
+    <div class="aurora aurora-two"></div>
+
+    <header class="top-bar">
+        <div class="brand">AccessGuard</div>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/register">Register</a>
+            <a href="/login">Login</a>
+            <a href="/welcome">Welcome</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <main class="page-wrap">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
