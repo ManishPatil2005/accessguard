@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="glass-card">
+    <h2>Admin Security Dashboard</h2>
+    <p class="subtitle">Monitor login activity, detect brute-force risk, and unlock accounts.</p>
+
+    {% if message %}
+    <div class="alert success">{{ message }}</div>
+    {% endif %}
+
+    <h3>Locked Accounts</h3>
+    {% if locked_users %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Failed Attempts</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in locked_users %}
+                <tr class="row-risk">
+                    <td>{{ user['email'] }}</td>
+                    <td>{{ user['failed_attempts'] }}</td>
+                    <td>
+                        <form method="post" action="/unlock/{{ user['email'] }}">
+                            <button class="btn btn-warning" type="submit">Unlock</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="muted">No accounts are currently locked.</p>
+    {% endif %}
+
+    <h3>Login Audit Log</h3>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Timestamp</th>
+                    <th>Status</th>
+                    <th>Lock State</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attempt in attempts %}
+                <tr class="{% if attempt['is_locked'] == 1 or attempt['success'] == 0 %}row-risk{% else %}row-safe{% endif %}">
+                    <td>{{ attempt['email'] }}</td>
+                    <td>{{ attempt['timestamp'] }}</td>
+                    <td>
+                        {% if attempt['success'] == 1 %}
+                            <span class="badge ok">Success</span>
+                        {% else %}
+                            <span class="badge fail">Failure</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if attempt['is_locked'] == 1 %}
+                            <span class="badge lock">Locked</span>
+                        {% else %}
+                            <span class="badge neutral">Normal</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<section class="glass-card hero-card">
+    <p class="eyebrow">Authenticated Session</p>
+    <h1>Welcome, {{ email }}</h1>
+    <p class="lead">
+        You are logged in as a <strong>{{ role }}</strong> account. Your access is restricted
+        according to role-based access control to minimize privilege abuse.
+    </p>
+    <div class="actions">
+        <a class="btn btn-secondary" href="/logout">Logout</a>
+    </div>
+</section>
+{% endblock %}
