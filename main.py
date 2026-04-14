@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from datetime import datetime
 import hashlib
 import os
@@ -13,7 +14,48 @@ from starlette.middleware.sessions import SessionMiddleware
 DB_PATH = "users.db"
 LOCK_THRESHOLD = 3
 
-app = FastAPI(title="AccessGuard")
+
+def init_db() -> None:
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            email TEXT PRIMARY KEY,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL CHECK(role IN ('admin', 'user')),
+            failed_attempts INTEGER NOT NULL DEFAULT 0,
+            is_locked INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS login_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            success INTEGER NOT NULL,
+            is_locked INTEGER NOT NULL
+        )
+        """
+    )
+
+    conn.commit()
+    conn.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    init_db()
+    yield
+    # Shutdown (cleanup if needed)
+
+
+app = FastAPI(title="AccessGuard", lifespan=lifespan)
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("ACCESSGUARD_SESSION_SECRET", "accessguard-dev-secret"),
@@ -70,42 +112,6 @@ def require_admin(request: Request) -> tuple[str, str]:
     if session_role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return session_email, session_role
-
-
-def init_db() -> None:
-    conn = get_db_connection()
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
-            email TEXT PRIMARY KEY,
-            password_hash TEXT NOT NULL,
-            role TEXT NOT NULL CHECK(role IN ('admin', 'user')),
-            failed_attempts INTEGER NOT NULL DEFAULT 0,
-            is_locked INTEGER NOT NULL DEFAULT 0,
-            created_at TEXT NOT NULL
-        )
-        """
-    )
-
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS login_attempts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            success INTEGER NOT NULL,
-            is_locked INTEGER NOT NULL
-        )
-        """
-    )
-
-    conn.commit()
-    conn.close()
-
-
-@app.on_event("startup")
-def startup() -> None:
-    init_db()
 
 
 @app.get("/")
