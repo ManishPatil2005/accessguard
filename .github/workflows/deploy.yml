@@ -1,0 +1,17 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Deploy to Render
+      run: |
+        echo "Deployment trigger for Render"
+        echo "Push to ${{ github.repository }} on ${{ github.ref }}"
+        echo "Render will automatically deploy on push"

@@ -1,0 +1,65 @@
+name: "Pull Request"
+description: "Submit a pull request"
+title: "[PR] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Pull Request
+
+        Thank you for contributing! Please describe your changes below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: "Brief description of changes"
+      placeholder: "What does this PR do?"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of Change
+      options:
+        - Bug fix (non-breaking)
+        - New feature (non-breaking)
+        - Breaking change
+        - Documentation update
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing Done
+      description: "How have you tested these changes?"
+      placeholder: |
+        - Tested on Windows/Linux/macOS
+        - Tested in Chrome/Firefox
+        - Manual testing completed
+        - No new errors in console
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: "Code follows style guidelines (PEP 8)"
+          required: true
+        - label: "I have commented complex logic"
+          required: false
+        - label: "I have updated documentation"
+          required: false
+        - label: "No new warnings generated"
+          required: true
+        - label: "Tested on multiple platforms"
+          required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: "Any additional context?"
+      placeholder: "Add any other notes here"

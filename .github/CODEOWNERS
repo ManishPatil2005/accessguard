@@ -1,0 +1,37 @@
+## Code Owners
+
+This file specifies who should review code changes.
+
+```
+# Security files
+SECURITY.md @ManishPatil2005
+
+# Core application
+main.py @ManishPatil2005
+
+# Templates and UI
+templates/ @ManishPatil2005
+static/ @ManishPatil2005
+
+# Documentation
+*.md @ManishPatil2005
+
+# Configuration
+requirements.txt @ManishPatil2005
+Procfile @ManishPatil2005
+render.yaml @ManishPatil2005
+```
+
+### Review Process
+
+- Security changes: Require immediate review
+- Core logic changes: Require review before merge
+- Documentation: Can be merged after single review
+- Tests: Must pass before merge
+
+### Branch Protection
+
+- `master` branch is protected
+- Requires at least 1 approval
+- Requires all checks to pass
+- Requires updated branch before merge
