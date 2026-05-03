@@ -127,12 +127,15 @@ def require_admin(request: Request) -> tuple[str, str]:
 
 @app.get("/")
 def home(request: Request):
-    return templates.TemplateResponse(request, "home.html", {})
+    return templates.TemplateResponse("home.html", {"request": request})
 
 
 @app.get("/register")
 def register_page(request: Request, message: str = ""):
-    return templates.TemplateResponse(request, "register.html", {"message": message, "message_type": "info"})
+    return templates.TemplateResponse(
+        "register.html",
+        {"request": request, "message": message, "message_type": "info"},
+    )
 
 
 @app.post("/register")
@@ -147,18 +150,16 @@ def register(
 
     if normalized_role not in {"admin", "user"}:
         return templates.TemplateResponse(
-            request,
             "register.html",
-            {"message": "Invalid role selected.", "message_type": "error"},
-            status.HTTP_400_BAD_REQUEST,
+            {"request": request, "message": "Invalid role selected.", "message_type": "error"},
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
 
     if len(password) < 8:
         return templates.TemplateResponse(
-            request,
             "register.html",
-            {"message": "Password must be at least 8 characters.", "message_type": "error"},
-            status.HTTP_400_BAD_REQUEST,
+            {"request": request, "message": "Password must be at least 8 characters.", "message_type": "error"},
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
 
     created_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -177,24 +178,25 @@ def register(
     except sqlite3.IntegrityError:
         conn.close()
         return templates.TemplateResponse(
-            request,
             "register.html",
-            {"message": "Account already exists.", "message_type": "error"},
-            status.HTTP_409_CONFLICT,
+            {"request": request, "message": "Account already exists.", "message_type": "error"},
+            status_code=status.HTTP_409_CONFLICT,
         )
 
     conn.close()
     return templates.TemplateResponse(
-        request,
         "register.html",
-        {"message": "Registration successful. Please sign in.", "message_type": "success"},
-        status.HTTP_201_CREATED,
+        {"request": request, "message": "Registration successful. Please sign in.", "message_type": "success"},
+        status_code=status.HTTP_201_CREATED,
     )
 
 
 @app.get("/login")
 def login_page(request: Request, message: str = ""):
-    return templates.TemplateResponse(request, "login.html", {"message": message, "message_type": "info"})
+    return templates.TemplateResponse(
+        "login.html",
+        {"request": request, "message": message, "message_type": "info"},
+    )
 
 
 @app.post("/login")
@@ -205,19 +207,17 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
     if user is None:
         log_login_attempt(normalized_email, success=False, is_locked=False)
         return templates.TemplateResponse(
-            request,
             "login.html",
-            {"message": "Invalid credentials.", "message_type": "error"},
-            status.HTTP_401_UNAUTHORIZED,
+            {"request": request, "message": "Invalid credentials.", "message_type": "error"},
+            status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
     if user["is_locked"] == 1:
         log_login_attempt(normalized_email, success=False, is_locked=True)
         return templates.TemplateResponse(
-            request,
             "login.html",
-            {"message": "Account is locked. Contact an admin.", "message_type": "error"},
-            status.HTTP_423_LOCKED,
+            {"request": request, "message": "Account is locked. Contact an admin.", "message_type": "error"},
+            status_code=status.HTTP_423_LOCKED,
         )
 
     if hash_password(password) != user["password_hash"]:
@@ -242,10 +242,9 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
             status_code = status.HTTP_401_UNAUTHORIZED
 
         return templates.TemplateResponse(
-            request,
             "login.html",
-            {"message": message, "message_type": "error"},
-            status_code,
+            {"request": request, "message": message, "message_type": "error"},
+            status_code=status_code,
         )
 
     conn = get_db_connection()
@@ -284,9 +283,9 @@ def welcome(request: Request):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
     
     return templates.TemplateResponse(
-        request,
         "welcome.html",
         {
+            "request": request,
             "email": session_email,
             "role": session_role,
             "is_locked": user_account["is_locked"],
@@ -331,9 +330,9 @@ def dashboard(request: Request):
     conn.close()
 
     return templates.TemplateResponse(
-        request,
         "dashboard.html",
         {
+            "request": request,
             "admin_email": admin_email,
             "attempts": attempts,
             "locked_users": locked_users,
